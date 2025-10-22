@@ -1,0 +1,16 @@
+[Unit]
+Description=Wyoming-Whisper Service
+
+[Container]
+Image=localhost/wyoming-whisper
+ContainerName=wyoming-whisper
+PublishPort=10300:10300/tcp
+AddDevice=/dev/dri
+GroupAdd=video
+SeccompProfile=unconfined
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
