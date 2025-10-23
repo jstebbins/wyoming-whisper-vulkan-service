@@ -96,4 +96,3 @@ ADD run.sh .
 
 EXPOSE ${WYOMING_PORT}
 ENTRYPOINT ["/opt/wyoming-whisper-vulkan-service/run.sh"]
-CMD ["-m ${WHISPER_MODEL}", "-l ${WHISPER_LANG}"]
