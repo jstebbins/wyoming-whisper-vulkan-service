@@ -17,6 +17,13 @@ Options:
 EOF
 }
 
+handle_term()
+{
+    echo "SIGTERM received, shutting down"
+    kill -TERM ${whisper_pid} ${wyoming_pid}
+}
+trap 'handle_term' TERM
+
 lang=en
 model=large-v3-turbo
 
@@ -40,7 +47,9 @@ while getopts "l:m:h" opt; do
 done
 
 whisper-server -pr -pp -fa -l ${lang} -m /opt/whisper.cpp/models/ggml-${model}.bin --host 127.0.0.1 --port 8910 &
+whisper_pid=$!
 /opt/wyoming-whisper-api-client/.venv/bin/wyoming-whisper-api-client --api http://127.0.0.1:8910/inference --uri tcp://0.0.0.0:10300 &
+wyoming_pid=$!
 
-wait -n
+wait -n ${whisper_pid} ${wyoming_pid}
 exit $?
