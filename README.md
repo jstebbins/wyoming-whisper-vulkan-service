@@ -93,7 +93,7 @@ cd
 
 At this point you may build the podman image and configure a user service
 that will be launched whenever the machine boots. The recommended modern
-way to run podman services is with Quadlets, `man podman-systemd`.
+way to run podman services is with Quadlets, `man podman-systemd.unit`.
 Example systemd quadlet file `wyoming-whisper.container`:
 ```
 [Unit]
