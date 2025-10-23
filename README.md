@@ -64,36 +64,17 @@ sudo firewall-cmd --zone=FedoraServer --add-port=10300/tcp
 sudo firewall-cmd --zone=FedoraServer --add-port=10300/tcp --permanent
 ```
 
-### Paranoid Penguin measures
-
-If you worry about keeping services such as this as far away from your personal
-data as possible (as I do), you may want to run this in a separate user account
-that does not have a password (so no external login is possible).
+### Systemd Quadlet
 
 I document the podman way below (a.k.a. The Way™). But this can also be accomplished
 with rootless docker.
 
-Create the user account. Example user is `bob`.
-```
-sudo useradd -m bob
-sudo usermod -L bob
-```
+After building the image you can create a systemd service from it so that
+it can be automatically started at boot. This may be done as a system
+or user service. I recommend a user service, and that is what is documented
+here.
 
-Configure the `bob` account so it can run services upon boot and services may
-continue running after `bob` logs out.
-```
-sudo loginctl enable-linger bob
-```
-
-Switch to `bob` user account and `/home/bob` directory
-```
-machinectl shell bob@
-cd
-```
-
-At this point you may build the podman image and configure a user service
-that will be launched whenever the machine boots. The recommended modern
-way to run podman services is with Quadlets, `man podman-systemd.unit`.
+The modern way to run podman services is with Quadlets, `man podman-systemd.unit`.
 Example systemd quadlet file `wyoming-whisper.container`:
 ```
 [Unit]
@@ -114,6 +95,12 @@ Restart=always
 WantedBy=default.target
 ```
 
+Assuming this service will be running under the user account `bob`.
+Enable starting user services at boot and persisting services after logout for user `bob`:
+```
+sudo loginctl enable-linger bob
+```
+
 Install the quadlet file:
 ```
 podman quadlet install wyoming-whisper.container
@@ -121,15 +108,36 @@ podman quadlet install wyoming-whisper.container
 
 The above basically just copies the file to `~/.config/containers/systemd/wyoming-whisper.container`.
 
-The systemd daemon needs to be reloaded after adding or changing files:
-```
-systemctl --user daemon-reload
-```
-
 Start the systemd user service:
 ```
 systemctl --user start wyoming-whisper.service
 ```
+
+### Paranoid Penguin measures
+
+If you worry about keeping services such as this as far away from your personal
+data as possible (as I do), you may want to run this in a separate user account
+that does not have a password (so no external login is possible).
+
+Create the user account. Example user is `bob`.
+```
+sudo useradd -m bob
+sudo usermod -L bob
+```
+
+Enable linger for `bob`. This can't be performed while logged in as `bob`
+since `bob` does not have `sudo` privileges.
+```
+sudo loginctl enable-linger bob
+```
+
+Switch to `bob` user account and `/home/bob` directory
+```
+machinectl shell bob@
+cd
+```
+
+Build the podman image and install the systemd service.
 
 ### Home Assistant
 
